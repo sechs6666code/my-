@@ -119,7 +119,7 @@
                 • <span class="highlight">完全握拳</span> : 聚合成圣诞树<br/>
                 • <span class="highlight">张开五指</span> : 幻化为漫天星云<br/>
                 • <span class="highlight">向右挥动掌心</span> : 顺时针旋转星空<br/>
-                • <span class="highlight">食指拇指捏合</span> : 抓取心动瞬间
+                • <span class="highlight">食指拇指捏合</span> : <span class="highlight">选中并点亮照片</span>
             </div>
             <button id="upload-btn" onclick="document.getElementById('file-input').click()">上传我们的照片</button>
             <input type="file" id="file-input" multiple accept="image/*">
@@ -260,9 +260,8 @@
             }
 
             if (currentState === STATE.SCATTER) {
-                // 自动基础旋转 + 手动向右旋转增量
                 mainGroup.rotation.y += (0.005 + rotationVelocity.y);
-                rotationVelocity.y *= 0.95; // 阻尼，让转动慢慢停下
+                rotationVelocity.y *= 0.95; 
             } else if (currentState === STATE.TREE) {
                 mainGroup.rotation.y += 0.005;
             }
@@ -298,13 +297,23 @@
             photoMeshes.forEach((mesh, idx) => {
                 let targetPos = currentState === STATE.TREE ? mesh.userData.treePos : mesh.userData.scatterPos;
                 let targetScale = 2;
+                
+                // 核心：选中时的金边反馈逻辑
                 if (currentState === STATE.ZOOM && idx === zoomTargetIndex) {
                     targetPos = mainGroup.worldToLocal(new THREE.Vector3(0, 0, 60));
                     targetScale = 8;
                     mesh.lookAt(camera.position);
+                    
+                    // 开启金边特效 (利用发光)
+                    mesh.material.emissive.setHex(0xd4af37);
+                    mesh.material.emissiveIntensity = 0.8;
                 } else {
                     mesh.rotation.y += 0.01;
+                    // 恢复普通状态
+                    mesh.material.emissive.setHex(0x000000);
+                    mesh.material.emissiveIntensity = 0;
                 }
+                
                 mesh.position.lerp(targetPos, 0.1);
                 mesh.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
             });
@@ -350,13 +359,10 @@
         }
 
         function handleGestureLogic(landmarks) {
-            // 获取当前手掌 x 坐标 (镜像处理)
             const currentHandX = 1 - landmarks[9].x;
             
-            // --- 核心修改：单向旋转逻辑 ---
             if (isHandPresent && currentState === STATE.SCATTER) {
                 const dx = currentHandX - lastHandPos.x;
-                // 只有当向右挥手（dx 为正）时，才增加旋转初速度
                 if (dx > 0.002) { 
                     rotationVelocity.y += dx * 0.2; 
                 }
@@ -432,12 +438,26 @@
         });
 
         function addPhotoMesh(img) {
-            const tex = new THREE.Texture(img); tex.needsUpdate = true; tex.colorSpace = THREE.SRGBColorSpace;
+            const tex = new THREE.Texture(img); 
+            tex.needsUpdate = true; 
+            tex.colorSpace = THREE.SRGBColorSpace;
             const aspect = img.width / img.height;
-            const mesh = new THREE.Mesh(new THREE.PlaneGeometry(5 * aspect, 5), new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide, transparent: true, opacity: 0.9 }));
+            
+            // 使用 MeshStandardMaterial 以便支持 emissive 金边效果
+            const material = new THREE.MeshStandardMaterial({ 
+                map: tex, 
+                side: THREE.DoubleSide, 
+                transparent: true, 
+                opacity: 0.95,
+                emissive: new THREE.Color(0x000000), // 初始无发光
+                emissiveIntensity: 0
+            });
+            
+            const mesh = new THREE.Mesh(new THREE.PlaneGeometry(5 * aspect, 5), material);
             const h = (Math.random() - 0.5) * 60;
             mesh.userData = { treePos: new THREE.Vector3((Math.random()-0.5)*15, h, (Math.random()-0.5)*15), scatterPos: new THREE.Vector3().setFromSphericalCoords(45, Math.random()*Math.PI, Math.random()*Math.PI*2) };
-            photoMeshes.push(mesh); mainGroup.add(mesh);
+            photoMeshes.push(mesh); 
+            mainGroup.add(mesh);
         }
 
         initThree(); animate(); setupMediaPipe();
