@@ -30,7 +30,6 @@
             display: block;
         }
         
-        /* 摄像头预览窗 - 增加金色边框质感 */
         #video-container {
             position: absolute; top: 20px; right: 20px; width: 140px; height: 105px; z-index: 2;
             border: 2px solid rgba(212, 175, 55, 0.4); border-radius: 12px; overflow: hidden;
@@ -117,9 +116,9 @@
             <h1>萍宝 圣诞快乐</h1>
             <div id="status-text">✨ 初始化星空...</div>
             <div class="instructions">
-                • <span class="highlight">完全握拳</span> : 聚集成圣诞树<br/>
+                • <span class="highlight">完全握拳</span> : 聚合成圣诞树<br/>
                 • <span class="highlight">张开五指</span> : 幻化为漫天星云<br/>
-                • <span class="highlight">水平挥动手掌</span> : 旋转星空角度<br/>
+                • <span class="highlight">向右挥动掌心</span> : 顺时针旋转星空<br/>
                 • <span class="highlight">食指拇指捏合</span> : 抓取心动瞬间
             </div>
             <button id="upload-btn" onclick="document.getElementById('file-input').click()">上传我们的照片</button>
@@ -151,7 +150,7 @@
         const STATE = { TREE: 'tree', SCATTER: 'scatter', ZOOM: 'zoom' };
         let currentState = STATE.TREE;
         let lastDetectedState = STATE.TREE;
-        let stateConfidence = 0; // 防抖计数器
+        let stateConfidence = 0; 
 
         let scene, camera, renderer, composer;
         let mainGroup = new THREE.Group();
@@ -183,7 +182,6 @@
             scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
 
             const renderScene = new RenderPass(scene, camera);
-            // 增强辉光效果，更有圣诞氛围
             const bloomPass = new UnrealBloomPass(new THREE.Vector2(w, h), 1.5, 0.4, 0.85);
             composer = new EffectComposer(renderer);
             composer.addPass(renderScene);
@@ -262,14 +260,13 @@
             }
 
             if (currentState === STATE.SCATTER) {
-                if (isHandPresent) {
-                    rotationVelocity.y += (handPos.x - lastHandPos.x) * 0.15;
-                }
-                mainGroup.rotation.y += rotationVelocity.y;
-                rotationVelocity.y *= 0.94; // 阻尼
+                // 自动基础旋转 + 手动向右旋转增量
+                mainGroup.rotation.y += (0.005 + rotationVelocity.y);
+                rotationVelocity.y *= 0.95; // 阻尼，让转动慢慢停下
             } else if (currentState === STATE.TREE) {
                 mainGroup.rotation.y += 0.005;
             }
+            
             lastHandPos.x = handPos.x;
             composer.render();
         }
@@ -313,7 +310,6 @@
             });
         }
 
-        // --- 重构的精准手势逻辑 ---
         async function setupMediaPipe() {
             const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm");
             const handLandmarker = await HandLandmarker.createFromOptions(vision, {
@@ -343,7 +339,6 @@
                 const landmarks = result.landmarks[0];
                 handleGestureLogic(landmarks);
                 
-                // 绘制手部骨架反馈
                 ctx.strokeStyle = "#d4af37"; ctx.lineWidth = 3;
                 [[0,1,2,3,4],[0,5,6,7,8],[5,9,10,11,12],[9,13,14,15,16],[13,17,18,19,20],[0,17]].forEach(p => {
                     ctx.beginPath(); ctx.moveTo(landmarks[p[0]].x * canvas.width, landmarks[p[0]].y * canvas.height);
@@ -355,20 +350,25 @@
         }
 
         function handleGestureLogic(landmarks) {
-            // 水平位置 (1 - x 因为镜像)
-            handPos.x = 1 - landmarks[9].x;
+            // 获取当前手掌 x 坐标 (镜像处理)
+            const currentHandX = 1 - landmarks[9].x;
+            
+            // --- 核心修改：单向旋转逻辑 ---
+            if (isHandPresent && currentState === STATE.SCATTER) {
+                const dx = currentHandX - lastHandPos.x;
+                // 只有当向右挥手（dx 为正）时，才增加旋转初速度
+                if (dx > 0.002) { 
+                    rotationVelocity.y += dx * 0.2; 
+                }
+            }
+            handPos.x = currentHandX;
 
-            // --- 精准判定核心算法 ---
-            // 判定手指是否“伸直”：指尖 Y 轴坐标显著小于指根 Y 轴坐标 (Y轴向下，越小越高)
             const isIndexExtended = landmarks[8].y < landmarks[6].y;
             const isMiddleExtended = landmarks[12].y < landmarks[10].y;
             const isRingExtended = landmarks[16].y < landmarks[14].y;
             const isPinkyExtended = landmarks[20].y < landmarks[18].y;
-            const isThumbExtended = landmarks[4].x > landmarks[3].x; // 简化处理拇指
-
             const extendedCount = [isIndexExtended, isMiddleExtended, isRingExtended, isPinkyExtended].filter(Boolean).length;
 
-            // 判定“捏合”：食指尖和拇指尖的距离
             const pinchDist = Math.hypot(landmarks[8].x - landmarks[4].x, landmarks[8].y - landmarks[4].y);
             const isPinching = pinchDist < 0.05;
 
@@ -376,12 +376,11 @@
             if (isPinching && photoMeshes.length > 0) {
                 detected = STATE.ZOOM;
             } else if (extendedCount <= 1) {
-                detected = STATE.TREE; // 几乎没手指伸出 -> 握拳
+                detected = STATE.TREE; 
             } else if (extendedCount >= 3) {
-                detected = STATE.SCATTER; // 伸出3根及以上 -> 张开
+                detected = STATE.SCATTER; 
             }
 
-            // 防抖：必须连续 5 帧检测到同一手势才切换
             if (detected === lastDetectedState) {
                 stateConfidence++;
             } else {
