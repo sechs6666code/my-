@@ -163,7 +163,8 @@
 
         let scene, camera, renderer, composer;
         let mainGroup = new THREE.Group();
-        let goldMesh, silverMesh, gemMesh, emeraldMesh, dustSystem;
+        // 新增 snowSystem 变量
+        let goldMesh, silverMesh, gemMesh, emeraldMesh, dustSystem, snowSystem;
         let photoMeshes = [], zoomTargetIndex = -1, logicData = { gold: [], silver: [], gem: [], emerald: [], dust: [] };
         let handPos = { x: 0.5, y: 0.5 }, lastHandPos = { x: 0.5, y: 0.5 }, isHandPresent = false, rotationVelocity = { x: 0, y: 0 };
         let time = 0;
@@ -185,7 +186,6 @@
         };
 
         window.handleUploadClick = () => {
-            // 用户触发上传时尝试开启音乐
             if (!musicPlaying) window.toggleMusic();
             document.getElementById('file-input').click();
         };
@@ -221,6 +221,7 @@
             createMaterialsAndMeshes();
             createDust();
             createStarField();
+            createSnow(); // 初始化雪花
             scene.add(mainGroup);
 
             window.addEventListener('resize', onWindowResize);
@@ -271,6 +272,33 @@
             mainGroup.add(dustSystem);
         }
 
+        // --- 新增：飘雪效果 ---
+        function createSnow() {
+            const pos = [];
+            const vel = [];
+            // 生成 2000 个雪花粒子
+            for (let i = 0; i < 2000; i++) {
+                // 随机位置：范围宽一点，覆盖全屏
+                pos.push((Math.random() - 0.5) * 200, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 200);
+                // 随机速度：x,z有微风摆动，y是下落速度
+                vel.push((Math.random() - 0.5) * 0.5, -Math.random() * 0.5 - 0.1, (Math.random() - 0.5) * 0.5);
+            }
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+            geo.setAttribute('velocity', new THREE.Float32BufferAttribute(vel, 3));
+            
+            // 雪花材质
+            const mat = new THREE.PointsMaterial({ 
+                color: 0xffffff, 
+                size: 0.5, 
+                transparent: true, 
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending 
+            });
+            snowSystem = new THREE.Points(geo, mat);
+            scene.add(snowSystem); // 添加到场景，而不是主组，这样不受旋转影响太大，更有沉浸感
+        }
+
         function createStarField() {
             const pos = [];
             for (let i = 0; i < 1000; i++) pos.push((Math.random() - 0.5) * 1000, (Math.random() - 0.5) * 1000, (Math.random() - 0.5) * 1000);
@@ -284,6 +312,27 @@
             [goldMesh, silverMesh, gemMesh, emeraldMesh].forEach((m, i) => updateInstancedMesh(m, Object.values(logicData)[i]));
             updateDust();
             updatePhotos();
+
+            // --- 新增：更新雪花位置 ---
+            if (snowSystem) {
+                const positions = snowSystem.geometry.attributes.position.array;
+                const velocities = snowSystem.geometry.attributes.velocity.array;
+                
+                for (let i = 0; i < 2000; i++) {
+                    // 更新位置
+                    positions[i * 3] += velocities[i * 3];     // X
+                    positions[i * 3 + 1] += velocities[i * 3 + 1]; // Y (下落)
+                    positions[i * 3 + 2] += velocities[i * 3 + 2]; // Z
+                    
+                    // 如果落到屏幕下方，重置到顶部
+                    if (positions[i * 3 + 1] < -60) {
+                        positions[i * 3 + 1] = 60; // 重置高度
+                        positions[i * 3] = (Math.random() - 0.5) * 200; // 随机新X
+                        positions[i * 3 + 2] = (Math.random() - 0.5) * 200; // 随机新Z
+                    }
+                }
+                snowSystem.geometry.attributes.position.needsUpdate = true;
+            }
 
             if (logicData.star) {
                 logicData.star.position.lerp(currentState === STATE.TREE ? logicData.star.userData.treePos : logicData.star.userData.scatterPos, 0.05);
