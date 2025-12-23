@@ -46,7 +46,7 @@
             <div class="instructions">
                 • <span class="highlight">完全握拳</span> : 聚合成圣诞树<br/>
                 • <span class="highlight">张开五指</span> : 幻化为漫天星云<br/>
-                • <span class="highlight">向右挥动掌心</span> : 顺时针旋转星空<br/>
+                • <span class="highlight">向右挥动掌心</span> : 惯性旋转星空<br/>
                 • <span class="highlight">食指拇指捏合</span> : 抓取心动瞬间
             </div>
             <button id="upload-btn" onclick="handleUploadClick()">上传我们的照片</button>
@@ -64,13 +64,18 @@
         import { FilesetResolver, HandLandmarker } from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0';
 
         const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-        const CONFIG = { goldCount: isMobile ? 400 : 800, silverCount: isMobile ? 300 : 600, gemCount: isMobile ? 200 : 400, emeraldCount: isMobile ? 200 : 400, dustCount: isMobile ? 1000 : 2000, treeHeight: 80, maxRadius: 35 };
+        const CONFIG = { goldCount: isMobile?400:800, silverCount: isMobile?300:600, gemCount: 200, emeraldCount: 200, dustCount: 1500, treeHeight: 80, maxRadius: 35 };
         const STATE = { TREE: 'tree', SCATTER: 'scatter', ZOOM: 'zoom' };
+        
         let currentState = STATE.TREE, lastDetectedState = STATE.TREE, stateConfidence = 0; 
         let scene, camera, renderer, composer, mainGroup = new THREE.Group();
         let goldMesh, silverMesh, gemMesh, emeraldMesh, dustSystem, snowSystem, meteorSystem = [];
         let photoMeshes = [], zoomTargetIndex = -1, logicData = { gold: [], silver: [], gem: [], emerald: [], dust: [] };
-        let handPos = { x: 0.5, y: 0.5 }, lastHandPos = { x: 0.5, y: 0.5 }, isHandPresent = false, rotationVelocity = { x: 0, y: 0 }, time = 0;
+        
+        // 关键控制变量
+        let handPos = { x: 0.5, y: 0.5 }, lastHandPos = { x: 0.5, y: 0.5 };
+        let rotationVelocity = 0, baseRotationSpeed = 0.005;
+        let isHandPresent = false, time = 0;
         const dummy = new THREE.Object3D();
 
         const bgm = document.getElementById('bgm');
@@ -84,78 +89,71 @@
             scene = new THREE.Scene(); scene.background = new THREE.Color(0x020205);
             const w = window.innerWidth, h = window.innerHeight;
             camera = new THREE.PerspectiveCamera(50, w / h, 0.1, 1000); camera.position.set(0, 10, w < h ? 160 : 120);
+            
             renderer = new THREE.WebGLRenderer({ antialias: !isMobile, powerPreference: "high-performance" });
             renderer.setSize(w, h); renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             renderer.toneMapping = THREE.ACESFilmicToneMapping; container.appendChild(renderer.domElement);
+            
             const pmremGenerator = new THREE.PMREMGenerator(renderer);
             scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+            
             composer = new EffectComposer(renderer);
             composer.addPass(new RenderPass(scene, camera));
-            composer.addPass(new UnrealBloomPass(new THREE.Vector2(w, h), 1.5, 0.4, 0.85));
+            const bloom = new UnrealBloomPass(new THREE.Vector2(w, h), 1.5, 0.4, 0.85);
+            composer.addPass(bloom);
 
             createMaterialsAndMeshes();
             createDust();
             createStarField();
             createSnow(); 
-            createAdvancedMeteors(); // 创建流星
+            createEnhancedMeteors(); 
             scene.add(mainGroup);
             window.addEventListener('resize', onWindowResize);
         }
 
-        // --- 核心修改：流星雨 ---
-        function createAdvancedMeteors() {
-            const meteorCount = 6;
-            for (let i = 0; i < meteorCount; i++) {
+        // --- 优化后的流星雨特效 ---
+        function createEnhancedMeteors() {
+            const count = 6;
+            for (let i = 0; i < count; i++) {
                 const group = new THREE.Group();
                 
-                // 1. 头部：发光的小星星 (Sprite)
+                // 1. 头部星星 (动态Canvas贴图)
                 const canvas = document.createElement('canvas');
                 canvas.width = 64; canvas.height = 64;
                 const ctx = canvas.getContext('2d');
-                const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-                grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
-                grad.addColorStop(0.2, 'rgba(255, 230, 150, 0.8)');
-                grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-                ctx.fillStyle = grad; ctx.fillRect(0, 0, 64, 64);
+                const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 30);
+                g.addColorStop(0, 'rgba(255, 255, 255, 1)');
+                g.addColorStop(0.3, 'rgba(255, 240, 180, 0.9)');
+                g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                ctx.fillStyle = g; ctx.fillRect(0, 0, 64, 64);
                 const starTex = new THREE.CanvasTexture(canvas);
-                const head = new THREE.Sprite(new THREE.SpriteMaterial({ map: starTex, transparent: true, blending: THREE.AdditiveBlending }));
+                const head = new THREE.Sprite(new THREE.SpriteMaterial({ map: starTex, blending: THREE.AdditiveBlending }));
                 head.scale.set(4, 4, 1);
                 
-                // 2. 拖尾：使用透明度渐变的 Mesh
-                const trailGeo = new THREE.PlaneGeometry(15, 0.6);
-                trailGeo.translate(-7.5, 0, 0); // 让旋转中心在头部
-                const trailMat = new THREE.MeshBasicMaterial({
-                    color: 0xffddaa,
-                    transparent: true,
-                    opacity: 0.5,
-                    side: THREE.DoubleSide,
-                    blending: THREE.AdditiveBlending,
-                    // 模拟拖尾渐变效果的简易Shader
-                });
-                // 简单的渐变贴图
-                const trailCanvas = document.createElement('canvas');
-                trailCanvas.width = 128; trailCanvas.height = 32;
-                const tCtx = trailCanvas.getContext('2d');
-                const tGrad = tCtx.createLinearGradient(0, 0, 128, 0);
-                tGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                tGrad.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
-                tCtx.fillStyle = tGrad; tCtx.fillRect(0, 0, 128, 32);
-                trailMat.map = new THREE.CanvasTexture(trailCanvas);
-
+                // 2. 动态渐变拖尾
+                const tCanvas = document.createElement('canvas');
+                tCanvas.width = 256; tCanvas.height = 32;
+                const tCtx = tCanvas.getContext('2d');
+                const tG = tCtx.createLinearGradient(0, 0, 256, 0);
+                tG.addColorStop(0, 'rgba(255, 220, 150, 0.8)');
+                tG.addColorStop(0.1, 'rgba(255, 200, 100, 0.5)');
+                tG.addColorStop(1, 'rgba(255, 150, 50, 0)');
+                tCtx.fillStyle = tG; tCtx.fillRect(0, 0, 256, 32);
+                
+                const trailGeo = new THREE.PlaneGeometry(25, 0.6);
+                trailGeo.translate(-12.5, 0, 0); 
+                const trailMat = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(tCanvas), transparent: true, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, depthWrite: false });
                 const trail = new THREE.Mesh(trailGeo, trailMat);
                 
-                group.add(head);
-                group.add(trail);
-                group.position.z = -50 - Math.random() * 50;
+                group.add(head); group.add(trail);
+                group.position.z = -40 - Math.random() * 40;
                 
-                const data = {
-                    speed: 0.8 + Math.random() * 1.2,
-                    curveHeight: 20 + Math.random() * 30,
-                    yOffset: (Math.random() - 0.5) * 40,
-                    x: -150 - Math.random() * 100
+                group.userData = {
+                    speed: 1.0 + Math.random() * 1.5,
+                    curve: 20 + Math.random() * 40,
+                    offsetY: (Math.random() - 0.5) * 50,
+                    x: -160 - Math.random() * 100
                 };
-                group.userData = data;
-                
                 scene.add(group);
                 meteorSystem.push(group);
             }
@@ -166,24 +164,74 @@
                 const d = m.userData;
                 d.x += d.speed;
                 m.position.x = d.x;
-                // y = -ax^2 + c
-                m.position.y = -0.003 * Math.pow(d.x, 2) + d.curveHeight + d.yOffset;
+                m.position.y = -0.003 * Math.pow(d.x, 2) + d.curve + d.offsetY;
                 
-                // 计算切线角度，让流星头和尾永远对准飞行方向
                 const nextX = d.x + 1;
-                const nextY = -0.003 * Math.pow(nextX, 2) + d.curveHeight + d.yOffset;
-                const angle = Math.atan2(nextY - m.position.y, nextX - m.position.x);
-                m.rotation.z = angle;
+                const nextY = -0.003 * Math.pow(nextX, 2) + d.curve + d.offsetY;
+                m.rotation.z = Math.atan2(nextY - m.position.y, nextX - m.position.x);
 
-                if (d.x > 150) {
-                    d.x = -150 - Math.random() * 50;
-                    d.speed = 0.8 + Math.random() * 1.2;
-                    m.position.z = -50 - Math.random() * 50;
+                if (d.x > 160) {
+                    d.x = -160 - Math.random() * 50;
+                    m.position.z = -40 - Math.random() * 40;
                 }
             });
         }
 
-        // --- 其他原有函数保持不变 ---
+        function animate() {
+            requestAnimationFrame(animate); 
+            time += 0.01;
+            
+            [goldMesh, silverMesh, gemMesh, emeraldMesh].forEach((m, i) => updateInstancedMesh(m, Object.values(logicData)[i]));
+            updateDust(); updatePhotos(); updateMeteors();
+
+            // --- 旋转控制逻辑 ---
+            if (currentState === STATE.SCATTER) {
+                mainGroup.rotation.y += (baseRotationSpeed + rotationVelocity);
+                rotationVelocity *= 0.96; // 惯性衰减
+            } else {
+                mainGroup.rotation.y += baseRotationSpeed;
+            }
+
+            if (snowSystem) {
+                const p = snowSystem.geometry.attributes.position.array;
+                for (let i = 0; i < 2000; i++) {
+                    p[i*3+1] -= 0.2;
+                    if (p[i*3+1] < -60) p[i*3+1] = 60;
+                }
+                snowSystem.geometry.attributes.position.needsUpdate = true;
+            }
+            
+            if (logicData.star) {
+                logicData.star.position.lerp(currentState === STATE.TREE ? logicData.star.userData.treePos : logicData.star.userData.scatterPos, 0.05);
+                logicData.star.rotation.y += 0.02;
+            }
+            composer.render();
+        }
+
+        function handleGestureLogic(l) {
+            const curX = 1 - l[9].x; 
+            // 只有在星云模式下才响应旋转手势
+            if (isHandPresent && currentState === STATE.SCATTER) {
+                const deltaX = curX - lastHandPos.x;
+                if (deltaX > 0.005) { // 向右挥动
+                    rotationVelocity += deltaX * 0.5;
+                }
+            }
+            lastHandPos.x = curX;
+
+            const ext = [l[8].y<l[6].y, l[12].y<l[10].y, l[16].y<l[14].y, l[20].y<l[18].y].filter(Boolean).length;
+            const pinch = Math.hypot(l[8].x-l[4].x, l[8].y-l[4].y) < 0.05;
+            
+            let det;
+            if (pinch && photoMeshes.length > 0) det = STATE.ZOOM;
+            else if (ext <= 1) det = STATE.TREE;
+            else if (ext >= 3) det = STATE.SCATTER;
+
+            if (det === lastDetectedState) stateConfidence++; else { stateConfidence = 0; lastDetectedState = det; }
+            if (stateConfidence > 5 && det && currentState !== det) { currentState = det; updateStatusText(); }
+        }
+
+        // --- 资源初始化函数 (保持不变) ---
         function createMaterialsAndMeshes() {
             const goldMat = new THREE.MeshPhysicalMaterial({ color: 0xffaa00, metalness: 1, roughness: 0.2, emissive: 0xffaa00, emissiveIntensity: 0.1 });
             const silverMat = new THREE.MeshPhysicalMaterial({ color: 0xeeeeee, metalness: 0.9, roughness: 0.1 });
@@ -194,7 +242,7 @@
             gemMesh = createInstancedMesh(new THREE.OctahedronGeometry(0.7, 0), gemMat, CONFIG.gemCount, logicData.gem);
             emeraldMesh = createInstancedMesh(new THREE.ConeGeometry(0.5, 1.2, 8), emeraldMat, CONFIG.emeraldCount, logicData.emerald);
             const star = new THREE.Mesh(new THREE.OctahedronGeometry(3.5, 0), new THREE.MeshPhysicalMaterial({ color: 0xffffff, emissive: 0xffffee, emissiveIntensity: 2 }));
-            star.userData = { treePos: new THREE.Vector3(0, CONFIG.treeHeight / 2 + 5, 0), scatterPos: new THREE.Vector3(0, 50, 0) };
+            star.userData = { treePos: new THREE.Vector3(0, CONFIG.treeHeight/2 + 5, 0), scatterPos: new THREE.Vector3(0, 50, 0) };
             mainGroup.add(star); logicData.star = star;
         }
 
@@ -207,7 +255,7 @@
                 const theta = Math.random() * Math.PI * 2;
                 const treePos = new THREE.Vector3(r * Math.cos(theta), h, r * Math.sin(theta));
                 const scatterPos = new THREE.Vector3().setFromSphericalCoords(40 + Math.random() * 40, Math.random() * Math.PI, Math.random() * Math.PI * 2);
-                dataArray.push({ treePos, scatterPos, currentPos: treePos.clone(), scale: 0.5 + Math.random(), rotSpeed: new THREE.Euler(Math.random() * 0.04, Math.random() * 0.04, 0), rotation: new THREE.Euler() });
+                dataArray.push({ treePos, scatterPos, currentPos: treePos.clone(), scale: 0.5 + Math.random(), rotSpeed: new THREE.Euler(Math.random()*0.04, Math.random()*0.04, 0), rotation: new THREE.Euler() });
             }
             mainGroup.add(mesh); return mesh;
         }
@@ -215,8 +263,8 @@
         function createDust() {
             const pos = [];
             for (let i = 0; i < CONFIG.dustCount; i++) {
-                const treePos = new THREE.Vector3((Math.random() - 0.5) * 30, (Math.random() - 0.5) * CONFIG.treeHeight, (Math.random() - 0.5) * 30);
-                const scatterPos = new THREE.Vector3().setFromSphericalCoords(60, Math.random() * Math.PI, Math.random() * Math.PI * 2);
+                const treePos = new THREE.Vector3((Math.random()-0.5)*30, (Math.random()-0.5)*CONFIG.treeHeight, (Math.random()-0.5)*30);
+                const scatterPos = new THREE.Vector3().setFromSphericalCoords(60, Math.random()*Math.PI, Math.random()*Math.PI*2);
                 logicData.dust.push({ treePos, scatterPos, currentPos: treePos.clone() });
                 pos.push(treePos.x, treePos.y, treePos.z);
             }
@@ -226,47 +274,25 @@
         }
 
         function createSnow() {
-            const pos = [], vel = [];
-            for (let i = 0; i < 2000; i++) {
-                pos.push((Math.random() - 0.5) * 200, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 200);
-                vel.push((Math.random() - 0.5) * 0.5, -Math.random() * 0.5 - 0.1, (Math.random() - 0.5) * 0.5);
-            }
-            const geo = new THREE.BufferGeometry();
-            geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-            geo.setAttribute('velocity', new THREE.Float32BufferAttribute(vel, 3));
+            const pos = [];
+            for (let i = 0; i < 2000; i++) pos.push((Math.random()-0.5)*200, (Math.random()-0.5)*100, (Math.random()-0.5)*200);
+            const geo = new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
             snowSystem = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.5, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending }));
             scene.add(snowSystem); 
         }
 
         function createStarField() {
             const pos = [];
-            for (let i = 0; i < 1000; i++) pos.push((Math.random() - 0.5) * 1000, (Math.random() - 0.5) * 1000, (Math.random() - 0.5) * 1000);
+            for (let i = 0; i < 1000; i++) pos.push((Math.random()-0.5)*1000, (Math.random()-0.5)*1000, (Math.random()-0.5)*1000);
             const geo = new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
             scene.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x666666, size: 0.8 })));
-        }
-
-        function animate() {
-            requestAnimationFrame(animate); time += 0.01;
-            [goldMesh, silverMesh, gemMesh, emeraldMesh].forEach((m, i) => updateInstancedMesh(m, Object.values(logicData)[i]));
-            updateDust(); updatePhotos(); updateMeteors();
-            if (snowSystem) {
-                const p = snowSystem.geometry.attributes.position.array;
-                const v = snowSystem.geometry.attributes.velocity.array;
-                for (let i = 0; i < 2000; i++) {
-                    p[i*3]+=v[i*3]; p[i*3+1]+=v[i*3+1]; p[i*3+2]+=v[i*3+2];
-                    if (p[i*3+1]<-60) { p[i*3+1]=60; p[i*3]=(Math.random()-0.5)*200; p[i*3+2]=(Math.random()-0.5)*200; }
-                }
-                snowSystem.geometry.attributes.position.needsUpdate = true;
-            }
-            if (logicData.star) { logicData.star.position.lerp(currentState === STATE.TREE ? logicData.star.userData.treePos : logicData.star.userData.scatterPos, 0.05); logicData.star.rotation.y += 0.02; }
-            if (currentState === STATE.SCATTER) { mainGroup.rotation.y += (0.005 + rotationVelocity.y); rotationVelocity.y *= 0.95; } else { mainGroup.rotation.y += 0.005; }
-            composer.render();
         }
 
         function updateInstancedMesh(mesh, dataArray) {
             dataArray.forEach((item, i) => {
                 const target = currentState === STATE.TREE ? item.treePos : item.scatterPos;
-                item.currentPos.lerp(target, 0.08); item.rotation.x += item.rotSpeed.x; item.rotation.y += item.rotSpeed.y;
+                item.currentPos.lerp(target, 0.08); 
+                item.rotation.x += item.rotSpeed.x; item.rotation.y += item.rotSpeed.y;
                 dummy.position.copy(item.currentPos); dummy.rotation.copy(item.rotation);
                 dummy.scale.setScalar(currentState === STATE.ZOOM ? item.scale * 0.4 : item.scale);
                 dummy.updateMatrix(); mesh.setMatrixAt(i, dummy.matrix);
@@ -317,15 +343,6 @@
                 });
             } else { isHandPresent = false; }
             requestAnimationFrame(() => predictWebcam(handLandmarker, video));
-        }
-
-        function handleGestureLogic(l) {
-            const curX = 1 - l[9].x; if (isHandPresent && currentState === STATE.SCATTER) { rotationVelocity.y += (curX - lastHandPos.x) * 0.2; } lastHandPos.x = curX;
-            const ext = [l[8].y<l[6].y, l[12].y<l[10].y, l[16].y<l[14].y, l[20].y<l[18].y].filter(Boolean).length;
-            const pinch = Math.hypot(l[8].x-l[4].x, l[8].y-l[4].y) < 0.05;
-            let det = pinch && photoMeshes.length > 0 ? STATE.ZOOM : (ext <= 1 ? STATE.TREE : (ext >= 3 ? STATE.SCATTER : null));
-            if (det === lastDetectedState) stateConfidence++; else { stateConfidence = 0; lastDetectedState = det; }
-            if (stateConfidence > 5 && det && currentState !== det) { currentState = det; updateStatusText(); }
         }
 
         function updateStatusText() {
