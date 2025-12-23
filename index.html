@@ -111,15 +111,15 @@
             window.addEventListener('resize', onWindowResize);
         }
 
-        // === 修复版流星雨系统 ===
+        // === 修复版流星雨系统 - 位置和大小优化 ===
         function createEnhancedMeteors() {
             const meteorCount = 8;
             
             for (let i = 0; i < meteorCount; i++) {
                 const group = new THREE.Group();
                 
-                // 1. 流星头部 - 发光球体
-                const headGeometry = new THREE.SphereGeometry(1.5, 16, 16);
+                // 1. 流星头部 - 大幅缩小
+                const headGeometry = new THREE.SphereGeometry(0.5, 16, 16);
                 const headMaterial = new THREE.MeshStandardMaterial({
                     color: 0xffffff,
                     emissive: 0xffff99,
@@ -130,8 +130,8 @@
                 
                 const head = new THREE.Mesh(headGeometry, headMaterial);
                 
-                // 2. 流星尾部 - 简化锥形
-                const trailGeometry = new THREE.ConeGeometry(3, 80, 8);
+                // 2. 流星尾部 - 缩小并调整长度
+                const trailGeometry = new THREE.ConeGeometry(1.2, 35, 8);
                 const trailMaterial = new THREE.MeshPhysicalMaterial({
                     color: 0xffdd88,
                     emissive: 0xffaa44,
@@ -145,16 +145,18 @@
                 });
                 
                 const trail = new THREE.Mesh(trailGeometry, trailMaterial);
-                trail.position.z = -40;
+                trail.position.z = -17;
                 trail.rotation.x = Math.PI / 2;
                 
                 group.add(head);
                 group.add(trail);
                 
-                // 3. 设置流星属性
+                // 3. 设置流星属性 - 位置大幅下调
                 const angle = Math.PI / 4 + (Math.random() - 0.5) * 0.4;
                 const speed = 2.5 + Math.random() * 1.5;
-                const offsetY = (Math.random() - 0.5) * 100;
+                
+                // Y位置范围从 ±100 改为 -20 到 60，确保在屏幕中央偏下
+                const offsetY = -20 + Math.random() * 80;
                 const startX = -250;
                 
                 group.userData = {
@@ -171,14 +173,15 @@
                     trailMaterial: trailMaterial
                 };
                 
-                group.position.z = Math.random() * 50 - 100; // 重要：必须有Z位置
+                // Z位置调整为更合理的范围
+                group.position.z = -30 - Math.random() * 40;
                 group.rotation.z = angle;
                 scene.add(group);
                 meteorSystem.push(group);
             }
         }
 
-        // === 更新流星 - 关键修复 ===
+        // === 更新流星 ===
         function updateMeteors() {
             meteorSystem.forEach((meteor) => {
                 const d = meteor.userData;
@@ -188,8 +191,12 @@
                 d.x += d.vx;
                 d.y += d.vy;
                 
-                // 位置更新 - 必须在可见范围内
-                meteor.position.set(d.x, d.y, -50);
+                // 位置更新 - Y轴范围限制在-50到100之间
+                meteor.position.set(
+                    d.x, 
+                    Math.max(-50, Math.min(100, d.y)),
+                    -50
+                );
                 
                 // 生命周期计算
                 const life = Math.min(d.elapsed / d.maxLife, 1.0);
@@ -210,7 +217,7 @@
                 // 重置流星
                 if (d.x > 250 || life > 1.0) {
                     d.x = -250 - Math.random() * 50;
-                    d.y = (Math.random() - 0.5) * 120;
+                    d.y = -20 + Math.random() * 80;
                     d.elapsed = 0;
                 }
             });
