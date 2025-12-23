@@ -111,107 +111,101 @@
             window.addEventListener('resize', onWindowResize);
         }
 
-        // === 修复版流星雨系统 - 位置和大小优化 ===
+        // === 简化流星雨系统 - 直线飞行，头大尾细 ===
         function createEnhancedMeteors() {
             const meteorCount = 8;
             
             for (let i = 0; i < meteorCount; i++) {
                 const group = new THREE.Group();
                 
-                // 1. 流星头部 - 大幅缩小
-                const headGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+                // 1. 流星头部 - 明亮的球体
+                const headGeometry = new THREE.SphereGeometry(0.6, 16, 16);
                 const headMaterial = new THREE.MeshStandardMaterial({
                     color: 0xffffff,
                     emissive: 0xffff99,
-                    emissiveIntensity: 2,
-                    metalness: 1,
-                    roughness: 0.3
+                    emissiveIntensity: 2.5,
+                    metalness: 0.9,
+                    roughness: 0.2
                 });
-                
                 const head = new THREE.Mesh(headGeometry, headMaterial);
+                head.position.z = 0;
                 
-                // 2. 流星尾部 - 缩小并调整长度
-                const trailGeometry = new THREE.ConeGeometry(1.2, 35, 8);
+                // 2. 流星尾部 - 锥形，头大尾细
+                const trailGeometry = new THREE.ConeGeometry(0.05, 40, 8);
                 const trailMaterial = new THREE.MeshPhysicalMaterial({
                     color: 0xffdd88,
                     emissive: 0xffaa44,
-                    emissiveIntensity: 1.5,
-                    transmission: 0.4,
+                    emissiveIntensity: 1.8,
                     transparent: true,
-                    opacity: 0.8,
+                    opacity: 0.9,
                     blending: THREE.AdditiveBlending,
                     side: THREE.DoubleSide,
                     depthWrite: false
                 });
-                
                 const trail = new THREE.Mesh(trailGeometry, trailMaterial);
-                trail.position.z = -17;
-                trail.rotation.x = Math.PI / 2;
+                trail.position.z = -20; // 尾部在后面
+                trail.rotation.x = Math.PI / 2; // 指向Z负方向
+                trail.scale.z = 1.5; // 拉长尾部
                 
                 group.add(head);
                 group.add(trail);
                 
-                // 3. 设置流星属性 - 位置大幅下调
-                const angle = Math.PI / 4 + (Math.random() - 0.5) * 0.4;
-                const speed = 2.5 + Math.random() * 1.5;
-                
-                // Y位置范围从 ±100 改为 -20 到 60，确保在屏幕中央偏下
+                // 3. 设置流星属性 - 简单直线运动
+                const speed = 3.0 + Math.random() * 2.0;
                 const offsetY = -20 + Math.random() * 80;
                 const startX = -250;
                 
                 group.userData = {
                     speed: speed,
-                    angle: angle,
-                    offsetY: offsetY,
                     x: startX,
                     y: offsetY,
-                    vx: speed * Math.cos(angle),
-                    vy: speed * Math.sin(angle),
+                    vx: speed, // 固定向右
+                    vy: speed * 0.15, // 略微向下（倾斜角度）
                     elapsed: 0,
-                    maxLife: 6,
-                    originalMaterial: headMaterial,
-                    trailMaterial: trailMaterial
+                    maxLife: 5
                 };
                 
-                // Z位置调整为更合理的范围
-                group.position.z = -30 - Math.random() * 40;
-                group.rotation.z = angle;
+                // 位置初始化
+                group.position.set(startX, offsetY, -50);
+                // 设置倾斜角度 - 从左上往右下
+                group.rotation.z = Math.atan2(group.userData.vy, group.userData.vx);
+                
                 scene.add(group);
                 meteorSystem.push(group);
             }
         }
 
-        // === 更新流星 ===
+        // === 更新流星 - 直线飞行 ===
         function updateMeteors() {
             meteorSystem.forEach((meteor) => {
                 const d = meteor.userData;
                 d.elapsed += 0.016;
                 
-                // 运动
+                // 直线运动
                 d.x += d.vx;
                 d.y += d.vy;
                 
-                // 位置更新 - Y轴范围限制在-50到100之间
+                // 更新位置
                 meteor.position.set(
                     d.x, 
                     Math.max(-50, Math.min(100, d.y)),
                     -50
                 );
                 
-                // 生命周期计算
+                // 生命周期：淡入淡出
                 const life = Math.min(d.elapsed / d.maxLife, 1.0);
                 const fadeIn = Math.min(life * 3, 1.0);
-                const fadeOut = Math.max(1.0 - (life - 0.65) / 0.35, 0);
+                const fadeOut = Math.max(1.0 - (life - 0.6) / 0.4, 0);
                 const intensity = fadeIn * fadeOut;
                 
-                // 更新发光强度
+                // 更新头部发光
                 meteor.children[0].material.emissiveIntensity = 2.5 * intensity;
-                meteor.children[0].material.opacity = Math.max(intensity, 0.3);
+                meteor.children[0].material.opacity = Math.max(intensity, 0.2);
                 
                 // 更新尾部
                 if (meteor.children[1]) {
-                    meteor.children[1].material.opacity = intensity * 0.8;
-                    meteor.children[1].material.emissiveIntensity = 1.5 * intensity;
+                    meteor.children[1].material.opacity = intensity * 0.85;
+                    meteor.children[1].material.emissiveIntensity = 1.8 * intensity;
                 }
                 
                 // 重置流星
@@ -219,6 +213,7 @@
                     d.x = -250 - Math.random() * 50;
                     d.y = -20 + Math.random() * 80;
                     d.elapsed = 0;
+                    meteor.position.set(d.x, d.y, -50);
                 }
             });
         }
