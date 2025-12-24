@@ -401,37 +401,67 @@
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const img = new Image(); img.src = e.target.result;
-                    img.onload = () => addPhotoMesh(img);
+                    img.onload = () => addPhotoMesh(img); // 手动上传无需索引
                 };
                 reader.readAsDataURL(file);
             });
         });
 
-        function addPhotoMesh(img) {
+        // --- 核心修改：addPhotoMesh 增加了 index 参数用于计算螺旋位置 ---
+        function addPhotoMesh(img, index = -1) {
             const tex = new THREE.Texture(img);
             tex.needsUpdate = true; 
             tex.colorSpace = THREE.SRGBColorSpace;
             const aspect = img.width / img.height;
             const mesh = new THREE.Mesh(new THREE.PlaneGeometry(5 * aspect, 5), new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide, transparent: true, opacity: 0.9 }));
-            const h = (Math.random() - 0.5) * 60;
+            
+            // --- 优化后的位置算法 (圆锥螺旋分布) ---
+            let h, theta;
+            
+            if (index >= 0) {
+                // 如果是预设图片，使用黄金角度螺旋分布，确保绝对均匀
+                // 让图片分布在树的中间 80% 区域，不要太靠顶也不要太靠底
+                const totalPresetsEstimate = 10; 
+                // 进度 0~1
+                const ratio = index / totalPresetsEstimate; 
+                
+                h = -CONFIG.treeHeight/2 + (CONFIG.treeHeight * 0.8) * ratio; 
+                theta = index * 2.4; // 2.4弧度 ≈ 黄金角，保证不重叠
+            } else {
+                // 如果是手动上传，依然随机，但限制在圆锥面上
+                h = (Math.random() - 0.5) * CONFIG.treeHeight * 0.8;
+                theta = Math.random() * Math.PI * 2;
+            }
+
+            // 根据高度计算当前的半径 (圆锥公式)
+            const normalizedH = (h + CONFIG.treeHeight/2) / CONFIG.treeHeight; // 0 (底) -> 1 (顶)
+            const maxRAtH = CONFIG.maxRadius * (1 - normalizedH); // 该高度下的最大半径
+            
+            // 将图片放在半径的 80%~100% 处，稍微靠外一点，避免被星星埋没
+            const r = maxRAtH * 0.9; 
+
+            const x = r * Math.cos(theta);
+            const z = r * Math.sin(theta);
+
             mesh.userData = { 
-                treePos: new THREE.Vector3((Math.random()-0.5)*15, h, (Math.random()-0.5)*15), 
+                treePos: new THREE.Vector3(x, h, z), 
                 scatterPos: new THREE.Vector3().setFromSphericalCoords(45, Math.random()*Math.PI, Math.random()*Math.PI*2) 
             };
+            
             photoMeshes.push(mesh); 
             mainGroup.add(mesh);
         }
 
         initThree(); 
 
-        // --- ⭐ 只有这里是新增的：自动加载 GitHub 上的 1.jpg 到 10.jpg ⭐ ---
-        // 自动循环尝试加载 1.jpg 到 10.jpg
+        // --- 自动加载 GitHub 上的 1.jpg 到 10.jpg ---
+        // 这里的 i 会作为 index 传入，确保分布均匀
         for (let i = 1; i <= 10; i++) {
             const img = new Image();
-            img.src = `${i}.jpg`; // 假设图片和 index.html 在同一个文件夹
+            img.src = `${i}.jpg`; 
             img.crossOrigin = "Anonymous"; 
             img.onload = () => {
-                addPhotoMesh(img);
+                addPhotoMesh(img, i); // 传入 i 确保位置不重叠
                 console.log(`已加载预设图片: ${i}.jpg`);
             };
         }
