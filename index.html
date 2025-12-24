@@ -5,26 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>萍宝 圣诞快乐</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Helvetica Neue', Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; [cite: 1, 2, 3] }
-        #canvas-wrapper { position: relative; width: 100%; height: 100%; background: radial-gradient(circle at center, #0a0a1a 0%, #000 100%); overflow: hidden; [cite: 3, 4] }
-        #canvas-container { width: 100%; height: 100%; display: block; [cite: 5] }
-        #video-container { position: absolute; top: 20px; right: 20px; width: 140px; height: 105px; z-index: 2; border: 2px solid rgba(212, 175, 55, 0.4); border-radius: 12px; overflow: hidden; transform: scaleX(-1); box-shadow: 0 0 20px rgba(0,0,0,0.8); background: rgba(0,0,0,0.5); transition: opacity 0.5s; [cite: 6, 7, 8] }
-        #input-video { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; [cite: 8, 9] }
-        #skeleton-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; [cite: 9, 10] }
-        #ui-layer { position: absolute; top: 30px; left: 30px; z-index: 3; pointer-events: none; color: #fff; text-shadow: 0 0 10px rgba(0,0,0,0.8); transition: opacity 0.5s; [cite: 10, 11] }
-        h1 { font-weight: 200; letter-spacing: 4px; text-transform: uppercase; font-size: 1.8rem; margin: 0 0 15px 0; background: linear-gradient(to right, #fff, #d4af37, #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; [cite: 12, 13] }
-        .instructions { font-size: 0.85rem; color: #ddd; line-height: 1.8; max-width: 280px; background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); [cite: 14, 15] }
-        .highlight { color: #d4af37; font-weight: bold; [cite: 16] }
-        #status-text { margin-bottom: 10px; font-size: 1rem; color: #fff; font-weight: bold; letter-spacing: 1px; [cite: 17] }
-        #upload-btn { pointer-events: auto; background: linear-gradient(45deg, #d4af37, #f9e29c); border: none; color: #000; padding: 10px 25px; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; margin-top: 20px; transition: 0.3s; letter-spacing: 1px; border-radius: 30px; font-weight: bold; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); [cite: 18, 19, 20] }
-        #upload-btn:hover { transform: scale(1.05); background: #fff; [cite: 20, 21] }
-        #file-input { display: none; [cite: 21] }
-        #loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #d4af37; font-size: 1.2rem; letter-spacing: 3px; z-index: 10; [cite: 22, 23] }
-        #fullscreen-btn, #music-btn { position: absolute; bottom: 30px; z-index: 20; background: rgba(255, 255, 255, 0.1); color: #d4af37; border: 1px solid #d4af37; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; backdrop-filter: blur(5px); transition: opacity 0.5s, transform 0.3s; [cite: 23, 24, 25] }
-        #fullscreen-btn { right: 30px; [cite: 26] }
-        #music-btn { left: 30px; [cite: 27] }
-        #music-btn:hover { transform: scale(1.1); [cite: 28] }
-        .hide-ui #ui-layer, .hide-ui #video-container, .hide-ui #music-btn { opacity: 0; pointer-events: none; [cite: 29] }
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Helvetica Neue', Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        #canvas-wrapper { position: relative; width: 100%; height: 100%; background: radial-gradient(circle at center, #0a0a1a 0%, #000 100%); overflow: hidden; }
+        #canvas-container { width: 100%; height: 100%; display: block; }
+        #video-container { position: absolute; top: 20px; right: 20px; width: 140px; height: 105px; z-index: 2; border: 2px solid rgba(212, 175, 55, 0.4); border-radius: 12px; overflow: hidden; transform: scaleX(-1); box-shadow: 0 0 20px rgba(0,0,0,0.8); background: rgba(0,0,0,0.5); transition: opacity 0.5s; }
+        #input-video { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
+        #skeleton-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
+        #ui-layer { position: absolute; top: 30px; left: 30px; z-index: 3; pointer-events: none; color: #fff; text-shadow: 0 0 10px rgba(0,0,0,0.8); transition: opacity 0.5s; }
+        h1 { font-weight: 200; letter-spacing: 4px; text-transform: uppercase; font-size: 1.8rem; margin: 0 0 15px 0; background: linear-gradient(to right, #fff, #d4af37, #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .instructions { font-size: 0.85rem; color: #ddd; line-height: 1.8; max-width: 280px; background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .highlight { color: #d4af37; font-weight: bold; }
+        #status-text { margin-bottom: 10px; font-size: 1rem; color: #fff; font-weight: bold; letter-spacing: 1px; }
+        #upload-btn { pointer-events: auto; background: linear-gradient(45deg, #d4af37, #f9e29c); border: none; color: #000; padding: 10px 25px; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; margin-top: 20px; transition: 0.3s; letter-spacing: 1px; border-radius: 30px; font-weight: bold; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); }
+        #upload-btn:hover { transform: scale(1.05); background: #fff; }
+        #file-input { display: none; }
+        #loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #d4af37; font-size: 1.2rem; letter-spacing: 3px; z-index: 10; }
+        #fullscreen-btn, #music-btn { position: absolute; bottom: 30px; z-index: 20; background: rgba(255, 255, 255, 0.1); color: #d4af37; border: 1px solid #d4af37; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; backdrop-filter: blur(5px); transition: opacity 0.5s, transform 0.3s; }
+        #fullscreen-btn { right: 30px; }
+        #music-btn { left: 30px; }
+        #music-btn:hover { transform: scale(1.1); }
+        .hide-ui #ui-layer, .hide-ui #video-container, .hide-ui #music-btn { opacity: 0; pointer-events: none; }
     </style>
     <script type="importmap">
         {
@@ -38,440 +38,436 @@
 <body>
 
     <div id="canvas-wrapper">
-        <div id="canvas-container"></div> 
+        <div id="canvas-container"></div>
         <div id="video-container">
             <video id="input-video" autoplay playsinline muted></video>
-            <canvas id="skeleton-canvas"></canvas> 
+            <canvas id="skeleton-canvas"></canvas>
         </div>
         <audio id="bgm" loop preload="auto">
             <source src="shengdange.mp3" type="audio/mpeg">
-        </audio> 
+        </audio>
         <button id="music-btn" onclick="toggleMusic()">🎵</button>
-        <button id="fullscreen-btn" onclick="toggleUI()">⛶</button> [cite: 31, 32]
+        <button id="fullscreen-btn" onclick="toggleUI()">⛶</button>
         <div id="ui-layer">
             <h1>萍宝 圣诞快乐</h1>
-            <div id="status-text">✨ 初始化星空...</div> [cite: 32]
+            <div id="status-text">✨ 初始化星空...</div>
             <div class="instructions">
                 • <span class="highlight">完全握拳</span> : 聚合成圣诞树<br/>
                 • <span class="highlight">张开五指</span> : 幻化为漫天星云<br/>
-                • <span class="highlight">比个“耶”</span> : 自动截图保存<br/>
-                • <span class="highlight">向右挥动</span> : 顺时针旋转星空<br/> 
+                • <span class="highlight">向右挥动</span> : 顺时针旋转星空<br/>
                 • <span class="highlight">手指捏合</span> : 抓取心动瞬间
             </div>
             <button id="upload-btn" onclick="handleUploadClick()">上传更多照片</button>
-            <input type="file" id="file-input" multiple accept="image/*"> [cite: 33]
+            <input type="file" id="file-input" multiple accept="image/*">
         </div>
-        <div id="loading">✨ 爱的引擎加载中... ✨</div> [cite: 33]
+        <div id="loading">✨ 爱的引擎加载中... ✨</div>
     </div>
 
     <script type="module">
         import * as THREE from 'three';
-        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'; [cite: 34]
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'; [cite: 35]
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
         import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-        import { FilesetResolver, HandLandmarker } from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0'; [cite: 36]
+        import { FilesetResolver, HandLandmarker } from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0';
 
-        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent); [cite: 36]
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        
         const CONFIG = {
-            goldCount: isMobile ? 400 : 800, [cite: 37, 38]
-            silverCount: isMobile ? 300 : 600, [cite: 38, 39]
-            gemCount: isMobile ? 200 : 400, [cite: 39, 40]
-            emeraldCount: isMobile ? 200 : 400, [cite: 40, 41]
-            dustCount: isMobile ? 1000 : 2000, [cite: 41, 42]
+            goldCount: isMobile ? 400 : 800,
+            silverCount: isMobile ? 300 : 600,
+            gemCount: isMobile ? 200 : 400,
+            emeraldCount: isMobile ? 200 : 400,
+            dustCount: isMobile ? 1000 : 2000,
             treeHeight: 80,
             maxRadius: 35
-        }; [cite: 42]
-        const STATE = { TREE: 'tree', SCATTER: 'scatter', ZOOM: 'zoom' }; [cite: 43]
+        };
+
+        const STATE = { TREE: 'tree', SCATTER: 'scatter', ZOOM: 'zoom' };
         let currentState = STATE.TREE;
-        let lastDetectedState = STATE.TREE; [cite: 43]
+        let lastDetectedState = STATE.TREE;
         let stateConfidence = 0; 
 
         let scene, camera, renderer, composer;
-        let mainGroup = new THREE.Group(); [cite: 44]
-        let goldMesh, silverMesh, gemMesh, emeraldMesh, dustSystem, snowSystem; [cite: 45]
-        let photoMeshes = [], zoomTargetIndex = -1, logicData = { gold: [], silver: [], gem: [], emerald: [], dust: [] }; [cite: 45]
-        let handPos = { x: 0.5, y: 0.5 }, lastHandPos = { x: 0.5, y: 0.5 }, isHandPresent = false, rotationVelocity = { x: 0, y: 0 }; [cite: 46]
-        let time = 0; [cite: 47]
-        const dummy = new THREE.Object3D(); [cite: 47]
-
-        // 截图逻辑变量
-        let lastScreenshotTime = 0;
+        let mainGroup = new THREE.Group();
+        let goldMesh, silverMesh, gemMesh, emeraldMesh, dustSystem, snowSystem;
+        let photoMeshes = [], zoomTargetIndex = -1, logicData = { gold: [], silver: [], gem: [], emerald: [], dust: [] };
+        let handPos = { x: 0.5, y: 0.5 }, lastHandPos = { x: 0.5, y: 0.5 }, isHandPresent = false, rotationVelocity = { x: 0, y: 0 };
+        let time = 0;
+        const dummy = new THREE.Object3D();
 
         // --- 音乐控制逻辑 ---
-        const bgm = document.getElementById('bgm'); [cite: 47]
-        let musicPlaying = false; [cite: 48]
+        const bgm = document.getElementById('bgm');
+        let musicPlaying = false;
 
         window.toggleMusic = () => {
             if (musicPlaying) {
-                bgm.pause(); [cite: 48]
-                document.getElementById('music-btn').innerText = '🔇'; [cite: 49]
+                bgm.pause();
+                document.getElementById('music-btn').innerText = '🔇';
             } else {
-                bgm.play().catch(e => console.error("音频播放失败:", e)); [cite: 49]
-                document.getElementById('music-btn').innerText = '🎵'; [cite: 50]
+                bgm.play().catch(e => console.error("音频播放失败:", e));
+                document.getElementById('music-btn').innerText = '🎵';
             }
-            musicPlaying = !musicPlaying; [cite: 50]
+            musicPlaying = !musicPlaying;
         };
+
         window.handleUploadClick = () => {
-            if (!musicPlaying) window.toggleMusic(); [cite: 51]
-            document.getElementById('file-input').click(); [cite: 51]
-        }; [cite: 52]
+            if (!musicPlaying) window.toggleMusic();
+            document.getElementById('file-input').click();
+        };
 
-        window.toggleUI = () => document.getElementById('canvas-wrapper').classList.toggle('hide-ui'); [cite: 52]
-
-        // --- 截图功能实现 ---
-        function takeScreenshot() {
-            composer.render(); // 确保捕捉到最新渲染结果
-            const canvas = renderer.domElement;
-            const dataURL = canvas.toDataURL('image/png');
-            
-            const link = document.createElement('a');
-            link.download = `pingbao_merry_christmas_${Date.now()}.png`;
-            link.href = dataURL;
-            link.click();
-            
-            const status = document.getElementById('status-text');
-            status.innerText = "📸 已为您捕捉瞬间！";
-            setTimeout(() => updateStatusText(), 2000);
-        }
+        window.toggleUI = () => document.getElementById('canvas-wrapper').classList.toggle('hide-ui');
 
         // --- Three.js 核心代码 ---
         function initThree() {
-            const container = document.getElementById('canvas-container'); [cite: 52]
-            scene = new THREE.Scene(); [cite: 53]
-            scene.background = new THREE.Color(0x020205); [cite: 53]
+            const container = document.getElementById('canvas-container');
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x020205);
 
-            const w = window.innerWidth, h = window.innerHeight; [cite: 53]
-            const camZ = w < h ? 160 : 120; [cite: 54]
-            camera = new THREE.PerspectiveCamera(50, w / h, 0.1, 1000); [cite: 54]
-            camera.position.set(0, 10, camZ); [cite: 55]
+            const w = window.innerWidth, h = window.innerHeight;
+            const camZ = w < h ? 160 : 120;
+            camera = new THREE.PerspectiveCamera(50, w / h, 0.1, 1000);
+            camera.position.set(0, 10, camZ);
 
-            renderer = new THREE.WebGLRenderer({ antialias: !isMobile, powerPreference: "high-performance" }); [cite: 55]
-            renderer.setSize(w, h); [cite: 55]
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); [cite: 55]
-            renderer.toneMapping = THREE.ACESFilmicToneMapping; [cite: 55]
-            container.appendChild(renderer.domElement); [cite: 55]
-            const pmremGenerator = new THREE.PMREMGenerator(renderer); [cite: 56]
-            scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture; [cite: 56]
+            renderer = new THREE.WebGLRenderer({ antialias: !isMobile, powerPreference: "high-performance" });
+            renderer.setSize(w, h);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            container.appendChild(renderer.domElement);
 
-            const renderScene = new RenderPass(scene, camera); [cite: 56]
-            const bloomPass = new UnrealBloomPass(new THREE.Vector2(w, h), 1.5, 0.4, 0.85); [cite: 57]
-            composer = new EffectComposer(renderer); [cite: 57]
-            composer.addPass(renderScene); [cite: 57]
-            composer.addPass(bloomPass); [cite: 57]
+            const pmremGenerator = new THREE.PMREMGenerator(renderer);
+            scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
 
-            createMaterialsAndMeshes(); [cite: 57]
-            createDust(); [cite: 57]
-            createStarField(); [cite: 57]
-            createSnow(); [cite: 57]
-            scene.add(mainGroup); [cite: 58]
-            window.addEventListener('resize', onWindowResize); [cite: 58]
+            const renderScene = new RenderPass(scene, camera);
+            const bloomPass = new UnrealBloomPass(new THREE.Vector2(w, h), 1.5, 0.4, 0.85);
+            composer = new EffectComposer(renderer);
+            composer.addPass(renderScene);
+            composer.addPass(bloomPass);
+
+            createMaterialsAndMeshes();
+            createDust();
+            createStarField();
+            createSnow();
+            
+            scene.add(mainGroup);
+            window.addEventListener('resize', onWindowResize);
         }
 
-        // [此处省略 createMaterialsAndMeshes, createInstancedMesh, createDust, createSnow, createStarField 等原函数，保持原样]
         function createMaterialsAndMeshes() {
-            const goldMat = new THREE.MeshPhysicalMaterial({ color: 0xffaa00, metalness: 1, roughness: 0.2, emissive: 0xffaa00, emissiveIntensity: 0.1 }); [cite: 58]
-            const silverMat = new THREE.MeshPhysicalMaterial({ color: 0xeeeeee, metalness: 0.9, roughness: 0.1 }); [cite: 59]
-            const gemMat = new THREE.MeshPhysicalMaterial({ color: 0xff0044, transmission: 0.5, thickness: 1, emissive: 0xff0044, emissiveIntensity: 0.2 }); [cite: 60]
-            const emeraldMat = new THREE.MeshPhysicalMaterial({ color: 0x00ff88, transmission: 0.4, thickness: 1, emissive: 0x00ff88, emissiveIntensity: 0.2 }); [cite: 61]
-            goldMesh = createInstancedMesh(new THREE.SphereGeometry(0.6, 12, 12), goldMat, CONFIG.goldCount, logicData.gold); [cite: 62]
-            silverMesh = createInstancedMesh(new THREE.BoxGeometry(0.7, 0.7, 0.7), silverMat, CONFIG.silverCount, logicData.silver); [cite: 62]
-            gemMesh = createInstancedMesh(new THREE.OctahedronGeometry(0.7, 0), gemMat, CONFIG.gemCount, logicData.gem); [cite: 63]
-            emeraldMesh = createInstancedMesh(new THREE.ConeGeometry(0.5, 1.2, 8), emeraldMat, CONFIG.emeraldCount, logicData.emerald); [cite: 63]
-            const star = new THREE.Mesh(new THREE.OctahedronGeometry(3.5, 0), new THREE.MeshPhysicalMaterial({ color: 0xffffff, emissive: 0xffffee, emissiveIntensity: 2 })); [cite: 64]
-            star.userData = { treePos: new THREE.Vector3(0, CONFIG.treeHeight / 2 + 5, 0), scatterPos: new THREE.Vector3(0, 50, 0) }; [cite: 65]
-            mainGroup.add(star); [cite: 65]
-            logicData.star = star; [cite: 66]
+            const goldMat = new THREE.MeshPhysicalMaterial({ color: 0xffaa00, metalness: 1, roughness: 0.2, emissive: 0xffaa00, emissiveIntensity: 0.1 });
+            const silverMat = new THREE.MeshPhysicalMaterial({ color: 0xeeeeee, metalness: 0.9, roughness: 0.1 });
+            const gemMat = new THREE.MeshPhysicalMaterial({ color: 0xff0044, transmission: 0.5, thickness: 1, emissive: 0xff0044, emissiveIntensity: 0.2 });
+            const emeraldMat = new THREE.MeshPhysicalMaterial({ color: 0x00ff88, transmission: 0.4, thickness: 1, emissive: 0x00ff88, emissiveIntensity: 0.2 });
+            
+            goldMesh = createInstancedMesh(new THREE.SphereGeometry(0.6, 12, 12), goldMat, CONFIG.goldCount, logicData.gold);
+            silverMesh = createInstancedMesh(new THREE.BoxGeometry(0.7, 0.7, 0.7), silverMat, CONFIG.silverCount, logicData.silver);
+            gemMesh = createInstancedMesh(new THREE.OctahedronGeometry(0.7, 0), gemMat, CONFIG.gemCount, logicData.gem);
+            emeraldMesh = createInstancedMesh(new THREE.ConeGeometry(0.5, 1.2, 8), emeraldMat, CONFIG.emeraldCount, logicData.emerald);
+            
+            const star = new THREE.Mesh(new THREE.OctahedronGeometry(3.5, 0), new THREE.MeshPhysicalMaterial({ color: 0xffffff, emissive: 0xffffee, emissiveIntensity: 2 }));
+            star.userData = { treePos: new THREE.Vector3(0, CONFIG.treeHeight / 2 + 5, 0), scatterPos: new THREE.Vector3(0, 50, 0) };
+            mainGroup.add(star);
+            logicData.star = star;
         }
 
         function createInstancedMesh(geo, mat, count, dataArray) {
-            const mesh = new THREE.InstancedMesh(geo, mat, count); [cite: 66]
+            const mesh = new THREE.InstancedMesh(geo, mat, count);
             for (let i = 0; i < count; i++) {
-                const h = Math.random() * CONFIG.treeHeight - CONFIG.treeHeight / 2; [cite: 67]
-                const rMax = CONFIG.maxRadius * (1 - (h + CONFIG.treeHeight / 2) / CONFIG.treeHeight); [cite: 68]
-                const r = Math.sqrt(Math.random()) * rMax; [cite: 68]
-                const theta = Math.random() * Math.PI * 2; [cite: 69]
-                const treePos = new THREE.Vector3(r * Math.cos(theta), h, r * Math.sin(theta)); [cite: 69]
-                const scatterPos = new THREE.Vector3().setFromSphericalCoords(40 + Math.random() * 40, Math.random() * Math.PI, Math.random() * Math.PI * 2); [cite: 70]
-                dataArray.push({ treePos, scatterPos, currentPos: treePos.clone(), scale: 0.5 + Math.random(), rotSpeed: new THREE.Euler(Math.random() * 0.04, Math.random() * 0.04, 0), rotation: new THREE.Euler() }); [cite: 71]
+                const h = Math.random() * CONFIG.treeHeight - CONFIG.treeHeight / 2;
+                const rMax = CONFIG.maxRadius * (1 - (h + CONFIG.treeHeight / 2) / CONFIG.treeHeight);
+                const r = Math.sqrt(Math.random()) * rMax;
+                const theta = Math.random() * Math.PI * 2;
+                const treePos = new THREE.Vector3(r * Math.cos(theta), h, r * Math.sin(theta));
+                const scatterPos = new THREE.Vector3().setFromSphericalCoords(40 + Math.random() * 40, Math.random() * Math.PI, Math.random() * Math.PI * 2);
+                dataArray.push({ treePos, scatterPos, currentPos: treePos.clone(), scale: 0.5 + Math.random(), rotSpeed: new THREE.Euler(Math.random() * 0.04, Math.random() * 0.04, 0), rotation: new THREE.Euler() });
             }
-            mainGroup.add(mesh); [cite: 72]
-            return mesh; [cite: 72]
+            mainGroup.add(mesh);
+            return mesh;
         }
 
         function createDust() {
-            const pos = []; [cite: 73]
+            const pos = [];
             for (let i = 0; i < CONFIG.dustCount; i++) {
-                const treePos = new THREE.Vector3((Math.random() - 0.5) * 30, (Math.random() - 0.5) * CONFIG.treeHeight, (Math.random() - 0.5) * 30); [cite: 74]
-                const scatterPos = new THREE.Vector3().setFromSphericalCoords(60, Math.random() * Math.PI, Math.random() * Math.PI * 2); [cite: 75]
-                logicData.dust.push({ treePos, scatterPos, currentPos: treePos.clone() }); [cite: 75]
-                pos.push(treePos.x, treePos.y, treePos.z); [cite: 76]
+                const treePos = new THREE.Vector3((Math.random() - 0.5) * 30, (Math.random() - 0.5) * CONFIG.treeHeight, (Math.random() - 0.5) * 30);
+                const scatterPos = new THREE.Vector3().setFromSphericalCoords(60, Math.random() * Math.PI, Math.random() * Math.PI * 2);
+                logicData.dust.push({ treePos, scatterPos, currentPos: treePos.clone() });
+                pos.push(treePos.x, treePos.y, treePos.z);
             }
-            const geo = new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); [cite: 76]
-            dustSystem = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffffee, size: 0.4, transparent: true, opacity: 0.5 })); [cite: 77]
-            mainGroup.add(dustSystem); [cite: 77]
+            const geo = new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+            dustSystem = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffffee, size: 0.4, transparent: true, opacity: 0.5 }));
+            mainGroup.add(dustSystem);
         }
 
         function createSnow() {
-            const pos = [], vel = []; [cite: 78]
+            const pos = [], vel = [];
             for (let i = 0; i < 2000; i++) {
-                pos.push((Math.random() - 0.5) * 200, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 200); [cite: 79]
-                vel.push((Math.random() - 0.5) * 0.5, -Math.random() * 0.5 - 0.1, (Math.random() - 0.5) * 0.5); [cite: 80]
+                pos.push((Math.random() - 0.5) * 200, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 200);
+                vel.push((Math.random() - 0.5) * 0.5, -Math.random() * 0.5 - 0.1, (Math.random() - 0.5) * 0.5);
             }
-            const geo = new THREE.BufferGeometry(); [cite: 81]
-            geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); [cite: 82]
-            geo.setAttribute('velocity', new THREE.Float32BufferAttribute(vel, 3)); [cite: 82]
-            const mat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.5, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending }); [cite: 82]
-            snowSystem = new THREE.Points(geo, mat); [cite: 83]
-            scene.add(snowSystem); [cite: 83]
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+            geo.setAttribute('velocity', new THREE.Float32BufferAttribute(vel, 3));
+            const mat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.5, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
+            snowSystem = new THREE.Points(geo, mat);
+            scene.add(snowSystem);
         }
 
         function createStarField() {
-            const pos = []; [cite: 83]
-            for (let i = 0; i < 1000; i++) pos.push((Math.random() - 0.5) * 1000, (Math.random() - 0.5) * 1000, (Math.random() - 0.5) * 1000); [cite: 84]
-            const geo = new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); [cite: 85]
-            scene.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x666666, size: 0.8 }))); [cite: 85]
+            const pos = [];
+            for (let i = 0; i < 1000; i++) pos.push((Math.random() - 0.5) * 1000, (Math.random() - 0.5) * 1000, (Math.random() - 0.5) * 1000);
+            const geo = new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+            scene.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x666666, size: 0.8 })));
         }
 
         function animate() {
-            requestAnimationFrame(animate); [cite: 86]
-            time += 0.01; [cite: 87]
-            [goldMesh, silverMesh, gemMesh, emeraldMesh].forEach((m, i) => updateInstancedMesh(m, Object.values(logicData)[i])); [cite: 87]
-            updateDust(); [cite: 87]
-            updatePhotos(); [cite: 87]
+            requestAnimationFrame(animate);
+            time += 0.01;
+            [goldMesh, silverMesh, gemMesh, emeraldMesh].forEach((m, i) => updateInstancedMesh(m, Object.values(logicData)[i]));
+            updateDust();
+            updatePhotos();
+            
             if (snowSystem) {
-                const positions = snowSystem.geometry.attributes.position.array; [cite: 88]
-                const velocities = snowSystem.geometry.attributes.velocity.array; [cite: 89]
+                const positions = snowSystem.geometry.attributes.position.array;
+                const velocities = snowSystem.geometry.attributes.velocity.array;
                 for (let i = 0; i < 2000; i++) {
-                    positions[i * 3] += velocities[i * 3]; [cite: 89]
-                    positions[i * 3 + 1] += velocities[i * 3 + 1]; [cite: 90]
-                    positions[i * 3 + 2] += velocities[i * 3 + 2]; [cite: 91]
+                    positions[i * 3] += velocities[i * 3];
+                    positions[i * 3 + 1] += velocities[i * 3 + 1];
+                    positions[i * 3 + 2] += velocities[i * 3 + 2];
                     if (positions[i * 3 + 1] < -60) {
-                        positions[i * 3 + 1] = 60; [cite: 92]
-                        positions[i * 3] = (Math.random() - 0.5) * 200; [cite: 93]
-                        positions[i * 3 + 2] = (Math.random() - 0.5) * 200; [cite: 93]
+                        positions[i * 3 + 1] = 60;
+                        positions[i * 3] = (Math.random() - 0.5) * 200;
+                        positions[i * 3 + 2] = (Math.random() - 0.5) * 200;
                     }
                 }
-                snowSystem.geometry.attributes.position.needsUpdate = true; [cite: 94]
+                snowSystem.geometry.attributes.position.needsUpdate = true;
             }
 
             if (logicData.star) {
-                logicData.star.position.lerp(currentState === STATE.TREE ? logicData.star.userData.treePos : logicData.star.userData.scatterPos, 0.05); [cite: 95]
-                logicData.star.rotation.y += 0.02; [cite: 96]
+                logicData.star.position.lerp(currentState === STATE.TREE ? logicData.star.userData.treePos : logicData.star.userData.scatterPos, 0.05);
+                logicData.star.rotation.y += 0.02;
             }
 
             if (currentState === STATE.SCATTER) {
-                mainGroup.rotation.y += (0.005 + rotationVelocity.y); [cite: 96]
-                rotationVelocity.y *= 0.95; [cite: 97]
+                mainGroup.rotation.y += (0.005 + rotationVelocity.y);
+                rotationVelocity.y *= 0.95; 
             } else if (currentState === STATE.TREE) {
-                mainGroup.rotation.y += 0.005; [cite: 97]
+                mainGroup.rotation.y += 0.005;
             }
-            lastHandPos.x = handPos.x; [cite: 98]
-            composer.render(); [cite: 98]
+            lastHandPos.x = handPos.x;
+            composer.render();
         }
 
         function updateInstancedMesh(mesh, dataArray) {
             dataArray.forEach((item, i) => {
-                const target = currentState === STATE.TREE ? item.treePos : item.scatterPos; [cite: 99]
-                item.currentPos.lerp(target, 0.08); [cite: 99]
-                item.rotation.x += item.rotSpeed.x; item.rotation.y += item.rotSpeed.y; [cite: 99]
-                dummy.position.copy(item.currentPos); dummy.rotation.copy(item.rotation); [cite: 100]
-                const s = currentState === STATE.ZOOM ? item.scale * 0.4 : item.scale; [cite: 100]
-                dummy.scale.setScalar(s); [cite: 100]
-                dummy.updateMatrix(); [cite: 100]
-                mesh.setMatrixAt(i, dummy.matrix); [cite: 100]
+                const target = currentState === STATE.TREE ? item.treePos : item.scatterPos;
+                item.currentPos.lerp(target, 0.08);
+                item.rotation.x += item.rotSpeed.x; item.rotation.y += item.rotSpeed.y;
+                dummy.position.copy(item.currentPos); dummy.rotation.copy(item.rotation);
+                const s = currentState === STATE.ZOOM ? item.scale * 0.4 : item.scale;
+                dummy.scale.setScalar(s);
+                dummy.updateMatrix();
+                mesh.setMatrixAt(i, dummy.matrix);
             });
-            mesh.instanceMatrix.needsUpdate = true; [cite: 101]
+            mesh.instanceMatrix.needsUpdate = true;
         }
 
         function updateDust() {
-            const positions = dustSystem.geometry.attributes.position.array; [cite: 101]
+            const positions = dustSystem.geometry.attributes.position.array;
             logicData.dust.forEach((item, i) => {
-                item.currentPos.lerp(currentState === STATE.TREE ? item.treePos : item.scatterPos, 0.05); [cite: 102]
-                positions[i * 3] = item.currentPos.x; positions[i * 3 + 1] = item.currentPos.y; positions[i * 3 + 2] = item.currentPos.z; [cite: 102]
+                item.currentPos.lerp(currentState === STATE.TREE ? item.treePos : item.scatterPos, 0.05);
+                positions[i * 3] = item.currentPos.x; positions[i * 3 + 1] = item.currentPos.y; positions[i * 3 + 2] = item.currentPos.z;
             });
-            dustSystem.geometry.attributes.position.needsUpdate = true; [cite: 103]
+            dustSystem.geometry.attributes.position.needsUpdate = true;
         }
 
         function updatePhotos() {
             photoMeshes.forEach((mesh, idx) => {
-                let targetPos = currentState === STATE.TREE ? mesh.userData.treePos : mesh.userData.scatterPos; [cite: 103]
-                let targetScale = 2; [cite: 103]
+                let targetPos = currentState === STATE.TREE ? mesh.userData.treePos : mesh.userData.scatterPos;
+                let targetScale = 2;
                 if (currentState === STATE.ZOOM && idx === zoomTargetIndex) {
-                    targetPos = mainGroup.worldToLocal(new THREE.Vector3(0, 0, 60)); [cite: 104]
-                    targetScale = 8; [cite: 104]
-                    mesh.lookAt(camera.position); [cite: 104]
+                    targetPos = mainGroup.worldToLocal(new THREE.Vector3(0, 0, 60));
+                    targetScale = 8;
+                    mesh.lookAt(camera.position);
                 } else {
-                    mesh.rotation.y += 0.01; [cite: 105]
+                    mesh.rotation.y += 0.01;
                 }
-                mesh.position.lerp(targetPos, 0.1); [cite: 105]
-                mesh.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1); [cite: 105]
+                mesh.position.lerp(targetPos, 0.1);
+                mesh.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
             });
         }
 
         async function setupMediaPipe() {
-            const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"); [cite: 106]
+            const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm");
             const handLandmarker = await HandLandmarker.createFromOptions(vision, {
                 baseOptions: { modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`, delegate: "GPU" },
                 runningMode: "VIDEO", numHands: 1
-            }); [cite: 107]
-            const video = document.getElementById("input-video"); [cite: 108]
+            });
+            const video = document.getElementById("input-video");
             navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } }).then((stream) => {
-                video.srcObject = stream; [cite: 108]
+                video.srcObject = stream;
                 video.onloadeddata = () => {
-                    document.getElementById('loading').style.display = 'none'; [cite: 108]
-                    document.getElementById('status-text').innerText = "✨ 准备就绪，伸出手试试"; [cite: 108]
-                    predictWebcam(handLandmarker, video); [cite: 109]
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('status-text').innerText = "✨ 准备就绪，伸出手试试";
+                    predictWebcam(handLandmarker, video);
                 };
             });
         }
 
         async function predictWebcam(handLandmarker, video) {
-            const result = handLandmarker.detectForVideo(video, performance.now()); [cite: 110]
-            const canvas = document.getElementById('skeleton-canvas'); [cite: 111]
-            const ctx = canvas.getContext('2d'); [cite: 111]
-            canvas.width = video.videoWidth; canvas.height = video.videoHeight; [cite: 111]
-            ctx.clearRect(0, 0, canvas.width, canvas.height); [cite: 111]
+            const result = handLandmarker.detectForVideo(video, performance.now());
+            const canvas = document.getElementById('skeleton-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             if (result.landmarks && result.landmarks.length > 0) {
-                isHandPresent = true; [cite: 112]
-                const landmarks = result.landmarks[0]; [cite: 113]
-                handleGestureLogic(landmarks); [cite: 113]
-                ctx.strokeStyle = "#d4af37"; ctx.lineWidth = 3; [cite: 113]
+                isHandPresent = true;
+                const landmarks = result.landmarks[0];
+                handleGestureLogic(landmarks);
+                ctx.strokeStyle = "#d4af37"; ctx.lineWidth = 3;
                 [[0,1,2,3,4],[0,5,6,7,8],[5,9,10,11,12],[9,13,14,15,16],[13,17,18,19,20],[0,17]].forEach(p => {
-                    ctx.beginPath(); ctx.moveTo(landmarks[p[0]].x * canvas.width, landmarks[p[0]].y * canvas.height); [cite: 114]
-                    p.slice(1).forEach(idx => ctx.lineTo(landmarks[idx].x * canvas.width, landmarks[idx].y * canvas.height)); [cite: 114]
-                    ctx.stroke(); [cite: 114]
+                    ctx.beginPath(); ctx.moveTo(landmarks[p[0]].x * canvas.width, landmarks[p[0]].y * canvas.height);
+                    p.slice(1).forEach(idx => ctx.lineTo(landmarks[idx].x * canvas.width, landmarks[idx].y * canvas.height));
+                    ctx.stroke();
                 });
-            } else { isHandPresent = false; } [cite: 115]
-            requestAnimationFrame(() => predictWebcam(handLandmarker, video)); [cite: 115]
+            } else { isHandPresent = false; }
+            requestAnimationFrame(() => predictWebcam(handLandmarker, video));
         }
 
         function handleGestureLogic(landmarks) {
-            const currentHandX = 1 - landmarks[9].x; [cite: 116]
+            const currentHandX = 1 - landmarks[9].x;
             if (isHandPresent && currentState === STATE.SCATTER) {
-                const dx = currentHandX - lastHandPos.x; [cite: 117]
-                if (dx > 0.002) rotationVelocity.y += dx * 0.2; [cite: 118]
+                const dx = currentHandX - lastHandPos.x;
+                if (dx > 0.002) rotationVelocity.y += dx * 0.2;
             }
-            handPos.x = currentHandX; [cite: 118]
-            
-            // 判断手指伸出情况
+            handPos.x = currentHandX;
             const isIndexExtended = landmarks[8].y < landmarks[6].y;
             const isMiddleExtended = landmarks[12].y < landmarks[10].y;
             const isRingExtended = landmarks[16].y < landmarks[14].y;
-            const isPinkyExtended = landmarks[20].y < landmarks[18].y; [cite: 119, 120]
-            
-            const extendedCount = [isIndexExtended, isMiddleExtended, isRingExtended, isPinkyExtended].filter(Boolean).length; [cite: 120]
-            const pinchDist = Math.hypot(landmarks[8].x - landmarks[4].x, landmarks[8].y - landmarks[4].y); [cite: 121]
-            const isPinching = pinchDist < 0.05; [cite: 121]
+            const isPinkyExtended = landmarks[20].y < landmarks[18].y;
+            const extendedCount = [isIndexExtended, isMiddleExtended, isRingExtended, isPinkyExtended].filter(Boolean).length;
+            const pinchDist = Math.hypot(landmarks[8].x - landmarks[4].x, landmarks[8].y - landmarks[4].y);
+            const isPinching = pinchDist < 0.05;
 
-            // --- 新增：“耶”手势识别 ---
-            // 食指和中指伸出，无名指和小指收起
-            const isVictory = isIndexExtended && isMiddleExtended && !isRingExtended && !isPinkyExtended;
-            if (isVictory && (Date.now() - lastScreenshotTime > 3000)) {
-                lastScreenshotTime = Date.now();
-                takeScreenshot();
-            }
-
-            let detected; [cite: 121]
+            let detected;
             if (isPinching && photoMeshes.length > 0) {
-                detected = STATE.ZOOM; [cite: 122]
+                detected = STATE.ZOOM;
             } else if (extendedCount <= 1) {
-                detected = STATE.TREE; [cite: 123]
+                detected = STATE.TREE;
             } else if (extendedCount >= 3) {
-                detected = STATE.SCATTER; [cite: 124]
+                detected = STATE.SCATTER;
             }
 
             if (detected === lastDetectedState) {
-                stateConfidence++; [cite: 125]
+                stateConfidence++;
             } else {
-                stateConfidence = 0; [cite: 126]
-                lastDetectedState = detected; [cite: 127]
+                stateConfidence = 0;
+                lastDetectedState = detected;
             }
 
             if (stateConfidence > 5 && detected) {
                 if (currentState !== detected) {
-                    currentState = detected; [cite: 127]
-                    updateStatusText(); [cite: 128]
+                    currentState = detected;
+                    updateStatusText();
                 }
             }
         }
 
         function updateStatusText() {
-            const status = document.getElementById('status-text'); [cite: 128]
+            const status = document.getElementById('status-text');
             if (currentState === STATE.TREE) {
-                status.innerText = "✨ 状态: 聚合圣诞树"; [cite: 129]
-                zoomTargetIndex = -1; [cite: 130]
+                status.innerText = "✨ 状态: 聚合圣诞树";
+                zoomTargetIndex = -1;
             } else if (currentState === STATE.SCATTER) {
-                status.innerText = "🌌 状态: 漫天星云"; [cite: 130]
-                zoomTargetIndex = -1; [cite: 131]
+                status.innerText = "🌌 状态: 漫天星云";
+                zoomTargetIndex = -1;
             } else if (currentState === STATE.ZOOM) {
-                status.innerText = "📸 状态: 抓取回忆"; [cite: 131]
+                status.innerText = "📸 状态: 抓取回忆";
                 if (zoomTargetIndex === -1 && photoMeshes.length > 0) {
-                    zoomTargetIndex = Math.floor(Math.random() * photoMeshes.length); [cite: 132]
+                    zoomTargetIndex = Math.floor(Math.random() * photoMeshes.length);
                 }
             }
         }
 
         function onWindowResize() {
-            const w = window.innerWidth, h = window.innerHeight; [cite: 133]
-            camera.aspect = w / h; [cite: 134]
-            camera.updateProjectionMatrix(); [cite: 134]
-            renderer.setSize(w, h); [cite: 134]
-            composer.setSize(w, h); [cite: 134]
+            const w = window.innerWidth, h = window.innerHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+            composer.setSize(w, h);
         }
 
         document.getElementById('file-input').addEventListener('change', (e) => {
             Array.from(e.target.files).forEach(file => {
-                const reader = new FileReader(); [cite: 135]
+                const reader = new FileReader();
                 reader.onload = (e) => {
-                    const img = new Image(); img.src = e.target.result; [cite: 135]
-                    img.onload = () => addPhotoMesh(img); // 手动上传无需索引 [cite: 136]
+                    const img = new Image(); img.src = e.target.result;
+                    img.onload = () => addPhotoMesh(img); // 手动上传无需索引
                 };
-                reader.readAsDataURL(file); [cite: 136]
+                reader.readAsDataURL(file);
             });
         });
 
+        // --- 核心修改：addPhotoMesh 增加了 index 参数用于计算螺旋位置 ---
         function addPhotoMesh(img, index = -1) {
-            const tex = new THREE.Texture(img); [cite: 137]
-            tex.needsUpdate = true; [cite: 138]
-            tex.colorSpace = THREE.SRGBColorSpace; [cite: 138]
-            const aspect = img.width / img.height; [cite: 138]
-            const mesh = new THREE.Mesh(new THREE.PlaneGeometry(5 * aspect, 5), new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide, transparent: true, opacity: 0.9 })); [cite: 139]
-            let h, theta; [cite: 140]
+            const tex = new THREE.Texture(img);
+            tex.needsUpdate = true; 
+            tex.colorSpace = THREE.SRGBColorSpace;
+            const aspect = img.width / img.height;
+            const mesh = new THREE.Mesh(new THREE.PlaneGeometry(5 * aspect, 5), new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide, transparent: true, opacity: 0.9 }));
+            
+            // --- 优化后的位置算法 (圆锥螺旋分布) ---
+            let h, theta;
+            
             if (index >= 0) {
-                const totalPresetsEstimate = 10; [cite: 141]
-                const ratio = index / totalPresetsEstimate; [cite: 142]
-                h = -CONFIG.treeHeight/2 + (CONFIG.treeHeight * 0.8) * ratio; [cite: 143]
-                theta = index * 2.4; [cite: 143]
+                // 如果是预设图片，使用黄金角度螺旋分布，确保绝对均匀
+                // 让图片分布在树的中间 80% 区域，不要太靠顶也不要太靠底
+                const totalPresetsEstimate = 10; 
+                // 进度 0~1
+                const ratio = index / totalPresetsEstimate; 
+                
+                h = -CONFIG.treeHeight/2 + (CONFIG.treeHeight * 0.8) * ratio; 
+                theta = index * 2.4; // 2.4弧度 ≈ 黄金角，保证不重叠
             } else {
-                h = (Math.random() - 0.5) * CONFIG.treeHeight * 0.8; [cite: 144]
-                theta = Math.random() * Math.PI * 2; [cite: 145]
+                // 如果是手动上传，依然随机，但限制在圆锥面上
+                h = (Math.random() - 0.5) * CONFIG.treeHeight * 0.8;
+                theta = Math.random() * Math.PI * 2;
             }
-            const normalizedH = (h + CONFIG.treeHeight/2) / CONFIG.treeHeight; [cite: 145]
-            const maxRAtH = CONFIG.maxRadius * (1 - normalizedH); [cite: 146]
-            const r = maxRAtH * 0.9; [cite: 147]
-            const x = r * Math.cos(theta); [cite: 148]
-            const z = r * Math.sin(theta); [cite: 148]
+
+            // 根据高度计算当前的半径 (圆锥公式)
+            const normalizedH = (h + CONFIG.treeHeight/2) / CONFIG.treeHeight; // 0 (底) -> 1 (顶)
+            const maxRAtH = CONFIG.maxRadius * (1 - normalizedH); // 该高度下的最大半径
+            
+            // 将图片放在半径的 80%~100% 处，稍微靠外一点，避免被星星埋没
+            const r = maxRAtH * 0.9; 
+
+            const x = r * Math.cos(theta);
+            const z = r * Math.sin(theta);
+
             mesh.userData = { 
                 treePos: new THREE.Vector3(x, h, z), 
                 scatterPos: new THREE.Vector3().setFromSphericalCoords(45, Math.random()*Math.PI, Math.random()*Math.PI*2) 
-            }; [cite: 149]
-            photoMeshes.push(mesh); [cite: 150]
-            mainGroup.add(mesh); [cite: 150]
+            };
+            
+            photoMeshes.push(mesh); 
+            mainGroup.add(mesh);
         }
 
-        initThree(); [cite: 150]
+        initThree(); 
+
+        // --- 自动加载 GitHub 上的 1.jpg 到 10.jpg ---
+        // 这里的 i 会作为 index 传入，确保分布均匀
         for (let i = 1; i <= 10; i++) {
-            const img = new Image(); [cite: 151]
-            img.src = `${i}.jpg`; [cite: 152]
-            img.crossOrigin = "Anonymous"; [cite: 152]
+            const img = new Image();
+            img.src = `${i}.jpg`; 
+            img.crossOrigin = "Anonymous"; 
             img.onload = () => {
-                addPhotoMesh(img, i); [cite: 152]
-                console.log(`已加载预设图片: ${i}.jpg`); [cite: 153]
+                addPhotoMesh(img, i); // 传入 i 确保位置不重叠
+                console.log(`已加载预设图片: ${i}.jpg`);
             };
         }
+        // ----------------------------------------------------------------
 
-        animate(); setupMediaPipe(); [cite: 154]
+        animate(); setupMediaPipe();
     </script>
 </body>
 </html>
